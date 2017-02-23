@@ -47,7 +47,7 @@ package object scalashop {
 
     val p = pixels.reduceLeft((x,y) => x.zip(y)
       .map { case (a,b) => a + b})
-        .map(x => math.rint(x.toDouble / pixels.size).toInt)
+        .map(_ / pixels.size)
 
 
     rgba(p(0),p(1),p(2),p(3))
