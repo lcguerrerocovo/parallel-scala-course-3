@@ -37,25 +37,19 @@ package object scalashop {
     def update(x: Int, y: Int, c: RGBA): Unit = data(y * width + x) = c
   }
 
-  implicit def tupleAddition(t: (Int,Int,Int,Int)) = new TupleAdder(t)
-
-  class TupleAdder(val t: (Int,Int,Int,Int)) {
-    def +(t2: (Int,Int,Int,Int)) = (t._1 + t2._1,t._2 + t2._2,t._3 + t2._3,t._4 + t2._4)
-    def /(t2: (Int,Int,Int,Int)) = (t._1 / t2._1,t._2 / t2._2,t._3 / t2._3,t._4 / t2._4)
-  }
-
   /** Computes the blurred RGBA value of a single pixel of the input image. */
   def boxBlurKernel(src: Img, x: Int, y: Int, radius: Int): RGBA = {
     val pixels = (for {
       i <- x-radius to x+radius
       j <- y-radius to y+radius
-      pixel = src(clamp(i,0,src.height-1),clamp(j,0,src.width-1))
-    } yield pixel).toList
+      pixel = src(clamp(i,0,src.width-1),clamp(j,0,src.height-1))
+    } yield List(red(pixel),green(pixel),blue(pixel),alpha(pixel))).toList
 
-    val p = pixels.map(x => (red(x),green(x),blue(x),alpha(x)))
-    val p2 = p.reduceLeft((x,y) => x + y) / (pixels.size,pixels.size,pixels.size,pixels.size)
+    val p = pixels.reduceLeft((x,y) => x.zip(y)
+      .map { case (a,b) => a + b})
+      .map(_ / pixels.size)
 
-    rgba(p2._1,p2._2,p2._3,p2._4)
+    rgba(p(0),p(1),p(2),p(3))
   }
 
 }
